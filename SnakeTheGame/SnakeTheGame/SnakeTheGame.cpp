@@ -54,3 +54,46 @@ void renderScore(SDL_Renderer* renderer, int tailLength, int scale, int wScale)
 
 	TTF_CloseFont(font);
 }
+
+bool checkCollision(int foodx, int foody, int playerx, int playery)
+{
+
+	if (playerx == foodx && playery == foody) {
+		return true;
+	}
+
+	return false;
+}
+
+
+pair<int, int> getFoodSpawn(vector<int> tailX, vector<int> tailY, int playerX, int playerY, int scale, int wScale, int tailLength)
+{
+	bool valid = false;
+	int x = 0;
+	int y = 0;
+	srand(time(0));
+	x = scale * (rand() % wScale);
+	y = scale * (rand() % wScale);
+	valid = true;
+
+
+	for (int i = 0; i < tailLength; i++) {
+
+		if ((x == tailX[i] && y == tailY[i]) || (x == playerX && y == playerY))
+		{
+			valid = false;
+		}
+
+	}
+
+	if (!valid) {
+		pair<int, int> foodLoc;
+		foodLoc = make_pair(-100, -100);
+		return foodLoc;
+	}
+
+	pair<int, int> foodLoc;
+	foodLoc = make_pair(x, y);
+
+	return foodLoc;
+}

@@ -232,5 +232,290 @@ void youWin(SDL_Renderer* renderer, SDL_Event event, int scale, int wScale, int 
 	}
 
 }
-}
 
+int main(int argc, char* argv[])
+{
+	SDL_Init(SDL_INIT_EVERYTHING);
+	if (TTF_Init() < 0) {
+		cout << "Error: " << TTF_GetError() << endl;
+	}
+
+	SDL_Window* window;
+	SDL_Renderer* renderer;
+	SDL_Event event;
+
+	SDL_Rect player;
+	player.x = 0;
+	player.y = 0;
+	player.h = 0;
+	player.w = 0;
+
+	int tailLength = 0;
+
+	// Вектори для зберігання позицій хвостових блоків
+	vector<int> tailX;
+	vector<int> tailY;
+
+	// Розмір плитки
+	int scale = 24;
+	int wScale = 24;
+
+	// Змінні позиції гравця
+	int x = 0;
+	int y = 0;
+	int prevX = 0;
+	int prevY = 0;
+
+	// Контроль руху
+	bool up = false;
+	bool down = false;
+	bool right = false;
+	bool left = false;
+	bool inputThisFrame = false;
+	bool redo = false;
+
+	// Прямокутник їжі
+	SDL_Rect food;
+	food.w = scale;
+	food.h = scale;
+	food.x = 0;
+	food.y = 0;
+
+	pair<int, int> foodLoc = getFoodSpawn(tailX, tailY, x, y, scale, wScale, tailLength);
+	food.x = foodLoc.first;
+	food.y = foodLoc.second;
+
+	window = SDL_CreateWindow("Snake the game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * wScale + 1, scale * wScale + 1, SDL_WINDOW_RESIZABLE);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+	float time = SDL_GetTicks() / 100;
+
+	// Основний ігровий цикл,  постійно працює і постійно оновлює все
+	while (true)
+	{
+		float newTime = SDL_GetTicks() / 75; //Значення (75) - це швидкість оновлення блоків
+		float delta = newTime - time;
+		time = newTime;
+
+		inputThisFrame = false;
+
+		// Перевіряє стан виграшу, хвіст повинен заповнити всі плитки
+		if (tailLength >= 575)
+		{
+			youWin(renderer, event, scale, wScale, tailLength);
+			x = 0;
+			y = 0;
+			up = false;
+			left = false;
+			right = false;
+			down = false;
+			tailX.clear();
+			tailY.clear();
+			tailLength = 0;
+			redo = false;
+			foodLoc = getFoodSpawn(tailX, tailY, x, y, scale, wScale, tailLength);
+
+			if (food.x == -100 && food.y == -100)
+			{
+				redo = true;
+			}
+
+			food.x = foodLoc.first;
+			food.y = foodLoc.second;
+		}
+
+		// Елементи управління
+		if (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT)
+			{
+				exit(0);
+			}
+
+			if (event.type == SDL_KEYDOWN && inputThisFrame == false)
+			{
+				if (down == false && event.key.keysym.scancode == SDL_SCANCODE_UP)
+				{
+					up = true;
+					left = false;
+					right = false;
+					down = false;
+					inputThisFrame = true;
+				}
+				else if (right == false && event.key.keysym.scancode == SDL_SCANCODE_LEFT)
+				{
+					up = false;
+					left = true;
+					right = false;
+					down = false;
+					inputThisFrame = true;
+				}
+				else if (up == false && event.key.keysym.scancode == SDL_SCANCODE_DOWN)
+				{
+					up = false;
+					left = false;
+					right = false;
+					down = true;
+					inputThisFrame = true;
+				}
+				else if (left == false && event.key.keysym.scancode == SDL_SCANCODE_RIGHT)
+				{
+					up = false;
+					left = false;
+					right = true;
+					down = false;
+					inputThisFrame = true;
+				}
+			}
+		}
+
+		// Попередня позиція блоку гравця
+		prevX = x;
+		prevY = y;
+
+		if (up)
+		{
+			y -= delta * scale;
+		}
+		else if (left)
+		{
+			x -= delta * scale;
+		}
+		else if (right)
+		{
+			x += delta * scale;
+		}
+		else if (down)
+		{
+			y += delta * scale;
+		}
+
+		if (redo == true)
+		{
+			redo = false;
+			foodLoc = getFoodSpawn(tailX, tailY, x, y, scale, wScale, tailLength);
+			food.x = foodLoc.first;
+			food.y = foodLoc.second;
+
+			if (food.x == -100 && food.y == -100)
+			{
+				redo = true;
+			}
+		}
+
+		// Перевірка на колізію з їжею
+		if (checkCollision(food.x, food.y, x, y))
+		{
+			// Спавнить нову їжу після її з’їдання
+			foodLoc = getFoodSpawn(tailX, tailY, x, y, scale, wScale, tailLength);
+			food.x = foodLoc.first;
+			food.y = foodLoc.second;
+
+			if (food.x == -100 && food.y == -100)
+			{
+				redo = true;
+			}
+
+			tailLength++;
+		}
+
+		// Запускається лише в тих кадрах, куди перемістився блок програвача
+		if (delta * scale == 24)
+		{
+			// Оновлює розмір та положення хвоста
+			if (tailX.size() != tailLength)
+			{
+				tailX.push_back(prevX);
+				tailY.push_back(prevY);
+			}
+
+			// Прокручує кожен хвіст, переміщає усі блоки до найближчого блоку попереду
+			// Оновлює блоки від кінця (найдальше від блоку гравця) до початку (найближчого до блоку гравця)
+			for (int i = 0; i < tailLength; i++)
+			{
+				if (i > 0)
+				{
+					tailX[i - 1] = tailX[i];
+					tailY[i - 1] = tailY[i];
+				}
+			}
+
+			if (tailLength > 0) {
+				tailX[tailLength - 1] = prevX;
+				tailY[tailLength - 1] = prevY;
+			}
+		}
+
+		// Гра закінчена, якщо гравець зіткнувся з хвостовим блоком, також скидає все
+		for (int i = 0; i < tailLength; i++)
+		{
+			if (x == tailX[i] && y == tailY[i])
+			{
+				gameOver(renderer, event, scale, wScale, tailLength);
+				x = 0;
+				y = 0;
+				up = false;
+				left = false;
+				right = false;
+				down = false;
+				tailX.clear();
+				tailY.clear();
+				tailLength = 0;
+				redo = false;
+
+				foodLoc = getFoodSpawn(tailX, tailY, x, y, scale, wScale, tailLength);
+				if (food.x == -100 && food.y == -100)
+				{
+					redo = true;
+				}
+
+				food.x = foodLoc.first;
+				food.y = foodLoc.second;
+			}
+		}
+
+		// Гра закінчена, якщо гравець вийшов за межі, також скидає стан гри
+		if (x < 0 || y < 0 || x > scale * wScale - scale || y > scale * wScale - scale)
+		{
+			gameOver(renderer, event, scale, wScale, tailLength);
+			x = 0;
+			y = 0;
+			up = false;
+			left = false;
+			right = false;
+			down = false;
+			tailX.clear();
+			tailY.clear();
+			tailLength = 0;
+			redo = false;
+			foodLoc = getFoodSpawn(tailX, tailY, x, y, scale, wScale, tailLength);
+			food.x = foodLoc.first;
+			food.y = foodLoc.second;
+
+			if (food.x == -100 && food.y == -100)
+			{
+				redo = true;
+			}
+		}
+
+		// Рендерить все
+		renderFood(renderer, food);
+		renderPlayer(renderer, player, x, y, scale, tailX, tailY, tailLength);
+		renderScore(renderer, tailLength, scale, wScale);
+
+		SDL_RenderDrawLine(renderer, 0, 0, 0, 24 * 24);
+		SDL_RenderDrawLine(renderer, 0, 24 * 24, 24 * 24, 24 * 24);
+		SDL_RenderDrawLine(renderer, 24 * 24, 24 * 24, 24 * 24, 0);
+		SDL_RenderDrawLine(renderer, 24 * 24, 0, 0, 0);
+
+		SDL_RenderPresent(renderer);
+
+		SDL_SetRenderDrawColor(renderer, 105, 105, 105, 255);
+		SDL_RenderClear(renderer);
+	}
+
+	SDL_DestroyWindow(window);
+	TTF_Quit();
+	SDL_Quit();
+	return 0;
+}

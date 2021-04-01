@@ -54,6 +54,7 @@ void renderScore(SDL_Renderer* renderer, int tailLength, int scale, int wScale)
 
 	TTF_CloseFont(font);
 }
+
 bool checkCollision(int foodx, int foody, int playerx, int playery)
 {
 
@@ -64,7 +65,9 @@ bool checkCollision(int foodx, int foody, int playerx, int playery)
 	return false;
 }
 
+
 // Отримує дійсну ікру для їжі, яка не знаходиться на вершині хвоста або блоку гравця
+
 pair<int, int> getFoodSpawn(vector<int> tailX, vector<int> tailY, int playerX, int playerY, int scale, int wScale, int tailLength)
 {
 	bool valid = false;
@@ -75,7 +78,10 @@ pair<int, int> getFoodSpawn(vector<int> tailX, vector<int> tailY, int playerX, i
 	y = scale * (rand() % wScale);
 	valid = true;
 
+
 	// Перевірка всіх блоків хвоста та блоку гравця
+
+
 	for (int i = 0; i < tailLength; i++) {
 
 		if ((x == tailX[i] && y == tailY[i]) || (x == playerX && y == playerY))
@@ -226,3 +232,5 @@ void youWin(SDL_Renderer* renderer, SDL_Event event, int scale, int wScale, int 
 	}
 
 }
+}
+

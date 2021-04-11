@@ -1,9 +1,0 @@
-﻿  SnakeTheGame.cpp
-D:\GitFoldier\snake_the_game\SnakeTheGame\SnakeTheGame\SnakeTheGame.cpp(76,12): warning C4244:  аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
-D:\GitFoldier\snake_the_game\SnakeTheGame\SnakeTheGame\SnakeTheGame.cpp(291,13): warning C4244:  инициализация: преобразование "Uint32" в "float", возможна потеря данных
-D:\GitFoldier\snake_the_game\SnakeTheGame\SnakeTheGame\SnakeTheGame.cpp(296,17): warning C4244:  инициализация: преобразование "Uint32" в "float", возможна потеря данных
-D:\GitFoldier\snake_the_game\SnakeTheGame\SnakeTheGame\SnakeTheGame.cpp(378,22): warning C4244:  -=: преобразование "float" в "int", возможна потеря данных
-D:\GitFoldier\snake_the_game\SnakeTheGame\SnakeTheGame\SnakeTheGame.cpp(382,22): warning C4244:  -=: преобразование "float" в "int", возможна потеря данных
-D:\GitFoldier\snake_the_game\SnakeTheGame\SnakeTheGame\SnakeTheGame.cpp(386,22): warning C4244:  +=: преобразование "float" в "int", возможна потеря данных
-D:\GitFoldier\snake_the_game\SnakeTheGame\SnakeTheGame\SnakeTheGame.cpp(390,22): warning C4244:  +=: преобразование "float" в "int", возможна потеря данных
-  SnakeTheGame.vcxproj -> D:\GitFoldier\snake_the_game\SnakeTheGame\Debug\SnakeTheGame.exe
